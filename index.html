@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="Christopher J Shaw">
+    <meta name="description" content="A simple matching game using the vue.js libarary and bootstrap 4 styling.">
+    <meta name="keywords" content="JavaScript,Vue,Bootstrap">
+
+    <title>Matching game built with vue.js</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://unpkg.com/vue"></script>
+
+    <script>
+      // Set up variables
+      var start = 0;
+      var shown = 0;
+      var selected = [];
+      var fruits = ['Apple', 'Banana', 'Grape', 'Mango', 'Guava', 'Peach', 'Kiwi', 'Orange'];
+      fruits = fruits.concat(fruits);
+
+      // Return a random fruit from list and remove from the list
+      function randomFruit() {
+        return fruits.splice(fruits.length * Math.random() | 0, 1)[0]
+      }
+
+      // Create the reusable tile component
+      Vue.component('tile', {
+        props: ['tile'],
+        template: '<div class="col-sm-3"><div style="height: 5em;" class="mb-3 card border-success text-success text-center" v-on:click="tileClick"><div class="card-block my-auto invisible"><blockquote class="card-blockquote"><p class="my-auto">{{ tile.text }}</p></blockquote></div></div></div>',
+        methods: {
+         tileClick: function () {
+           // Increment the clicks count, even if it is already selected.
+           if (game.matches < 8){
+             game.clicks ++;
+           }
+
+
+           console.log(this)
+
+           if (start == 0){
+             start = new Date().getTime();
+           }
+
+           // If two are shown
+           if (shown == 2){
+             // Check if the selected text do not match
+             if(selected[0].value.$el.innerText != selected[1].value.$el.innerText) {
+               selected[0].value.$el.firstChild.firstChild.classList.add('invisible');
+               selected[1].value.$el.firstChild.firstChild.classList.add('invisible');
+             }
+
+             // Reset variables
+             shown = 0;
+             selected = [];
+           }
+
+           // When the user clicks on an invisible tile
+           if (this.$el.firstChild.firstChild.classList.contains('invisible') && shown < 2) {
+
+             // Show the tile and add to dictionary of selected tiles
+              this.$el.firstChild.firstChild.classList.remove('invisible');
+              selected.push({
+                  key:   shown,
+                  value: this
+              });
+              shown ++;
+
+              if (shown == 1){
+                game.message = 'Click a second tile.';
+              }
+
+              if (shown == 2){
+                // Check if the selected text match
+                if(selected[0].value.$el.innerText == selected[1].value.$el.innerText) {
+                  game.matches ++;
+                  game.message = 'Match, Well done.';
+                  selected[0].value.$el.firstChild.classList.remove('text-success');
+                  selected[1].value.$el.firstChild.classList.remove('text-success');
+                  selected[0].value.$el.firstChild.classList.add('text-light');
+                  selected[1].value.$el.firstChild.classList.add('text-light');
+                  selected[0].value.$el.firstChild.classList.add('bg-success');
+                  selected[1].value.$el.firstChild.classList.add('bg-success');
+                } else {
+                  game.message = 'No Match, click any tile to continue.'
+                }
+
+                if (game.matches == 8) {
+                  // Game Finished\
+                  end = new Date().getTime();
+                  game.seconds = (end - start) / 1000;
+                  game.message = 'Finished, it took you ' + game.clicks + ' clicks in ' + game.seconds + ' seconds to find all the matches.';
+                }
+              }
+            }
+         }
+        }
+      })
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="row" id="gameboard">
+        <tile
+            v-for="item in tileList"
+            v-bind:tile="item"
+            v-bind:key="item.id">
+        </tile>
+
+        <div class="col-sm-2 bg-success text-light">User Clicks: {{ clicks }}</div>
+        <div class="col-sm-2 bg-success text-light">Tile Matches: {{ matches }}</div>
+        <div class="col bg-success text-light">{{ message }}</div>
+      </div>
+
+      <script>
+      var game = new Vue({
+       el: '#gameboard',
+       data: {
+         clicks: 0,
+         matches: 0,
+         message: 'Click any tile to start.',
+         seconds: 0,
+         tileList: [
+           { id: 0, text: randomFruit() },
+           { id: 1, text: randomFruit() },
+           { id: 2, text: randomFruit() },
+           { id: 3, text: randomFruit() },
+           { id: 4, text: randomFruit() },
+           { id: 5, text: randomFruit() },
+           { id: 6, text: randomFruit() },
+           { id: 7, text: randomFruit() },
+           { id: 8, text: randomFruit() },
+           { id: 9, text: randomFruit() },
+           { id: 10, text: randomFruit() },
+           { id: 11, text: randomFruit() },
+           { id: 12, text: randomFruit() },
+           { id: 13, text: randomFruit() },
+           { id: 14, text: randomFruit() },
+           { id: 15, text: randomFruit() }
+         ]
+       }
+      })
+      </script>
+    </div>
+  </body>
+</html>
